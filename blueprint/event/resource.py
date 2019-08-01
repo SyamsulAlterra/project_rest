@@ -1,8 +1,10 @@
-from flask import Flask, request, Blueprint
-from flask_restful import Resource, Api, reqparse, marshal
-from .model import Events
-from blueprint import app, db, internal_required
-from flask_jwt_extended import jwt_required, get_jwt_claims
+from flask import Blueprint
+from flask_restful import Api, reqparse, Resource, marshal
+from .model import Event
+from blueprint import db, app,internal_required
+from flask_jwt_extended import jwt_required
 
-bp_event = Blueprint('event', __name__)
+bp_event = Blueprint('event',__name__)
 api = Api(bp_event)
+
+

@@ -1,7 +1,7 @@
 from blueprint import db
 from flask_restful import fields
 
-class Events(db.Model):
+class Event(db.Model):
     __tablename__='event'
     id=db.Column(db.Integer, primary_key=True, autoincrement=True)
     nama=db.Column(db.String(30), nullable=False)

@@ -1,1 +1,0 @@
-[2019-08-01 20:55:20,920] {/home/alta9/Desktop/pair_project/blueprint/__init__.py:65} WARNING - REQUEST_LOG	{"method": "GET", "code": "200 OK", "uri": "/user/event/4?", "request": null, "response": {"my_location": "Sukun, Malang Kota, East Java, Indonesia", "currency_code": "IDR", "rates": 15636.525303}}
