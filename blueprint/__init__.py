@@ -36,7 +36,6 @@ def internal_required(fn):
 ##########################
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:alta321@localhost:3306/project_rest'
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -73,10 +72,11 @@ def after_request(response):
 ###############
 
 from .auth import bp_auth
-from .event import bp_event
+from blueprint.user.resource import bp_user
+from blueprint.event.resource import bp_event
 
 app.register_blueprint(bp_auth, urlprefix='/login')
-app.register_blueprint(bp_event, urlprefix='/event')
+app.register_blueprint(bp_user, urlprefix='/user')
 
 
 db.create_all()
