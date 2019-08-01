@@ -3,8 +3,8 @@ from flask_restful import Api, reqparse, Resource, marshal
 from .model import User
 from blueprint.event.model import Event
 from blueprint import db, app,internal_required
-from flask_jwt_extended import jwt_required
-import requests,json
+from flask_jwt_extended import jwt_required, get_jwt_claims
+import requests, json, datetime
 
 bp_user = Blueprint('user',__name__)
 api = Api(bp_user)
@@ -46,12 +46,15 @@ class InvitationResource(Resource):
         qry=Event.query.get(id)
         if qry is None:
             return {'status':'EVENT_NOT_FOUND'},404
-        result = marshal(qry,Event.response_fields)
+        hasil = marshal(qry,Event.response_fields)
 
+        result={}
 
-        rq = requests.get(self.lokasi_host,params={'apiKey':self.lokasi_key,'ip':result['ip']})
+        rq = requests.get(location_host,params={'apiKey':location_apikey,'ip':hasil['ip']})
         event_location = rq.json()
 
+        event_loc = event_location['district']+', '+event_location['city']+', '+event_location['state_prov']+', '+event_location['country_name']
+        
         # sholat
         lat=event_location['latitude']
         lon=event_location['longitude']
@@ -72,6 +75,10 @@ class InvitationResource(Resource):
         # bahasa
         bahasa=event_location['languages']
 
+        result['event_name']=hasil['nama']
+        result['event_location'] = event_loc
+        result['event_date'] = hasil['waktu']
+        result['PIC'] = marshal(User.query.get(id), User.response_fields)['nama']
         result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
         result['islamic_praying_time']=jadwal_solat
         result['language_to_learn']=bahasa
@@ -123,14 +130,14 @@ class InternalUserResource(Resource):
     @jwt_required
     def get(self):
         claim = get_jwt_claims()
-        all_event = Events.query.all()
+        all_event = Event.query.all()
 
         if all_event == None:
             return {'message': 'no event'}, 404
 
         event_list=[]
         for event in all_event:
-            event_dict = marshal(event, Events.response_fields)
+            event_dict = marshal(event, Event.response_fields)
             event_list.append(event_dict)
 
         return event_list, 200
@@ -140,27 +147,37 @@ class InternalUserResource(Resource):
     def post(self):
         claim = get_jwt_claims()
         parser = reqparse.RequestParser()
-        parser.add_argument('nama', location=args, required=True)
-        parser.add_argument('ip', locations=args, required=True)
-        parser.add_argument('waktu', locations=args, required=True)
+        parser.add_argument('nama', location=json, required=True)
+        parser.add_argument('ip', location=json, required=True)
+        parser.add_argument('waktu', location=json, type=datetime, required=True)
         args = parser.parse_args()
         creator_id = claim['id']
         
-        new_event = Events(args['nama'], args['ip'], args['waktu'], creator_id)
+        new_event = Event(args['nama'], args['ip'], args['waktu'], creator_id)
+
+        app.logger.debug('DEBUG : %s', new_event)
 
         db.session.add(new_event)
         db.session.commit()
 
         return {'message': 'new event succesfully added'}, 200
 
+<<<<<<< HEAD
         @jwt_required
         @internal_required
         def put(self, id):
             parser=reqparse.RequestParser()
+=======
+    @jwt_required
+    @internal_required
+    def put(self, id):
+        parser=reqparse.RequestParser()
+>>>>>>> a0b383044cd1f77a831848709310ec301c87d5f5
 
             parser.add_argument('nama',location='json',required=True)
             parser.add_argument('waktu',location='json',required=True)
 
+<<<<<<< HEAD
             args = parser.parse_args()
             
             qry = Event.query.get(id)
@@ -170,6 +187,17 @@ class InternalUserResource(Resource):
             
             rq=requests.get('https://ip.seeip.org/json')
             external_user_ip=rq.json()
+=======
+        args = parser.parse_args()
+
+        qry = Event.query.get(id)
+
+        if qry is None:
+            return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
+
+        rq=requests.get('https://ip.seeip.org/json')
+        external_user_ip=rq.json()
+>>>>>>> a0b383044cd1f77a831848709310ec301c87d5f5
 
             data = parser.parse_args()
             external_user_id=get_jwt_claims()['id']
@@ -182,6 +210,7 @@ class InternalUserResource(Resource):
 
             return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
 
+<<<<<<< HEAD
             
         @jwt_required
         @internal_required
@@ -189,6 +218,15 @@ class InternalUserResource(Resource):
             qry = Events.get(id)
             if qry == None:
                 return {'message': 'event not found'}, 404
+=======
+      
+    @jwt_required
+    @internal_required
+    def delete(self, id):
+        qry = Event.get(id)
+        if qry == None:
+            return {'message': 'event not found'}, 404
+>>>>>>> a0b383044cd1f77a831848709310ec301c87d5f5
 
             db.session.delete(qry)
             db.session.commit()
