@@ -1,4 +1,4 @@
-from blueprints import db
+from blueprint import db
 from flask_restful import fields
 
 class Events(db.Model):
@@ -7,7 +7,7 @@ class Events(db.Model):
     nama=db.Column(db.String(30), nullable=False)
     ip=db.Column(db.String(20), nullable=False)
     waktu=db.Column(db.DateTime, nullable=False)
-    user_id=db.Column(db.integer, db.ForeignKey('user.id'), nullable=False)
+    user_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     response_fields={
         'id': fields.Integer,
