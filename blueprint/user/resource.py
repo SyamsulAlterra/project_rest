@@ -153,47 +153,47 @@ class InternalUserResource(Resource):
 
         return {'message': 'new event succesfully added'}, 200
 
-      @jwt_required
-      @internal_required
-      def put(self, id):
-        parser=reqparse.RequestParser()
+        @jwt_required
+        @internal_required
+        def put(self, id):
+            parser=reqparse.RequestParser()
 
-        parser.add_argument('nama',location='json',required=True)
-        parser.add_argument('waktu',location='json',required=True)
+            parser.add_argument('nama',location='json',required=True)
+            parser.add_argument('waktu',location='json',required=True)
 
-        args = parser.parse_args()
-        
-        qry = Event.query.get(id)
+            args = parser.parse_args()
+            
+            qry = Event.query.get(id)
 
-        if qry is None:
-            return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
-        
-        rq=requests.get('https://ip.seeip.org/json')
-        external_user_ip=rq.json()
+            if qry is None:
+                return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
+            
+            rq=requests.get('https://ip.seeip.org/json')
+            external_user_ip=rq.json()
 
-        data = parser.parse_args()
-        external_user_id=get_jwt_claims()['id']
+            data = parser.parse_args()
+            external_user_id=get_jwt_claims()['id']
 
-        qry.nama = args['nama']
-        qry.ip = external_user_ip
-        qry.waktu = args['waktu']
-        qry.user_id = external_user_id
-        db.session.commit()
+            qry.nama = args['nama']
+            qry.ip = external_user_ip
+            qry.waktu = args['waktu']
+            qry.user_id = external_user_id
+            db.session.commit()
 
-        return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
+            return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
 
-      
-    @jwt_required
-    @internal_required
-    def delete(self, id):
-        qry = Events.get(id)
-        if qry == None:
-            return {'message': 'event not found'}, 404
+            
+        @jwt_required
+        @internal_required
+        def delete(self, id):
+            qry = Events.get(id)
+            if qry == None:
+                return {'message': 'event not found'}, 404
 
-        db.session.delete(qry)
-        db.session.commit()
+            db.session.delete(qry)
+            db.session.commit()
 
-        return {'message': 'event succesfully deleted'}, 200
+            return {'message': 'event succesfully deleted'}, 200
 
    
         
