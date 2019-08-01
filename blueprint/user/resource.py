@@ -162,32 +162,14 @@ class InternalUserResource(Resource):
 
         return {'message': 'new event succesfully added'}, 200
 
-<<<<<<< HEAD
-        @jwt_required
-        @internal_required
-        def put(self, id):
-            parser=reqparse.RequestParser()
-=======
     @jwt_required
     @internal_required
     def put(self, id):
         parser=reqparse.RequestParser()
->>>>>>> a0b383044cd1f77a831848709310ec301c87d5f5
 
-            parser.add_argument('nama',location='json',required=True)
-            parser.add_argument('waktu',location='json',required=True)
+        parser.add_argument('nama',location='json',required=True)
+        parser.add_argument('waktu',location='json',required=True)
 
-<<<<<<< HEAD
-            args = parser.parse_args()
-            
-            qry = Event.query.get(id)
-
-            if qry is None:
-                return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
-            
-            rq=requests.get('https://ip.seeip.org/json')
-            external_user_ip=rq.json()
-=======
         args = parser.parse_args()
 
         qry = Event.query.get(id)
@@ -197,20 +179,18 @@ class InternalUserResource(Resource):
 
         rq=requests.get('https://ip.seeip.org/json')
         external_user_ip=rq.json()
->>>>>>> a0b383044cd1f77a831848709310ec301c87d5f5
 
-            data = parser.parse_args()
-            external_user_id=get_jwt_claims()['id']
+        data = parser.parse_args()
+        external_user_id=get_jwt_claims()['id']
 
-            qry.nama = args['nama']
-            qry.ip = external_user_ip
-            qry.waktu = args['waktu']
-            qry.user_id = external_user_id
-            db.session.commit()
+        qry.nama = args['nama']
+        qry.ip = external_user_ip
+        qry.waktu = args['waktu']
+        qry.user_id = external_user_id
+        db.session.commit()
 
-            return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
+        return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
 
-<<<<<<< HEAD
             
         @jwt_required
         @internal_required
@@ -218,15 +198,6 @@ class InternalUserResource(Resource):
             qry = Events.get(id)
             if qry == None:
                 return {'message': 'event not found'}, 404
-=======
-      
-    @jwt_required
-    @internal_required
-    def delete(self, id):
-        qry = Event.get(id)
-        if qry == None:
-            return {'message': 'event not found'}, 404
->>>>>>> a0b383044cd1f77a831848709310ec301c87d5f5
 
             db.session.delete(qry)
             db.session.commit()
