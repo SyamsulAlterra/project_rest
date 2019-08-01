@@ -76,9 +76,9 @@ from blueprint.auth import bp_auth
 from blueprint.user.resource import bp_user
 from blueprint.event.resource import bp_event
 
-app.register_blueprint(bp_auth, urlprefix='/login')
-app.register_blueprint(bp_user, urlprefix='/user')
-app.register_blueprint(bp_event, urlprefix='/')
+app.register_blueprint(bp_auth, url_prefix='/login')
+app.register_blueprint(bp_user, url_prefix='/user')
+app.register_blueprint(bp_event, url_prefix='/')
 
 
 db.create_all()
