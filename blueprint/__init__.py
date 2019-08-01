@@ -34,7 +34,9 @@ def internal_required(fn):
 ##########################
 # DATABASE
 ##########################
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:alta321@localhost:3306/project_rest'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
