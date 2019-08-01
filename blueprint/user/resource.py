@@ -10,8 +10,6 @@ bp_user = Blueprint('user',__name__)
 api = Api(bp_user)
 
 
-
-   
 class InvitationResource(Resource):
     def __init__(self):
         pass
