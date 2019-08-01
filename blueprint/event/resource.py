@@ -6,3 +6,5 @@ from flask_jwt_extended import jwt_required
 
 bp_event = Blueprint('event',__name__)
 api = Api(bp_event)
+
+
