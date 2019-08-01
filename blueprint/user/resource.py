@@ -4,6 +4,7 @@ from .model import User
 from ..event.model import Events
 from blueprint import app, db, internal_required
 from flask_jwt_extended import jwt_required, get_jwt_claims
+import requests, json
 
 bp_user = Blueprint('user', __name__)
 api = Api(bp_user)
@@ -57,9 +58,46 @@ class UserResource(Resource):
 
         return {'message': 'event succesfully deleted'}, 200
 
+class InvitationResource(Resource):
+    def __init__(self):
+        pass
+
+    @jwt_required
+    def get(self, id):
+        location_host = 'https://api.ipgeolocation.io/ipgeo'
+        location_apikey = 'fb1a8036e91f496092fb3a34f3abbb0f'
+        currency_host = 'http://data.fixer.io/api/latest'
+        currency_apikey = '1562319ae83fefd9bd13debd3b4a337b'
+        tes = id
+
+        my_ip = requests.get('https://ip.seeip.org/json')
+        my_ip = my_ip.json()['ip']
+
+        data = requests.get(location_host, params={
+            'apiKey': location_apikey,
+            'ip': my_ip
+        })
+        data = data.json()
+
+        currency_data = requests.get(currency_host, params={'access_key': currency_apikey})
+        currency_data = currency_data.json()
+
+
+        my_location = data['district']+', '+data['city']+', '+data['state_prov']+', '+data['country_name']
+        currency_code = data['currency']['code']
+        rates = currency_data['rates'][currency_code]
+
+        result ={
+            'my_location': my_location,
+            'currency_code': currency_code,
+            'rates': rates
+        }
+
+        return result, 200
         
 
-api.add_resource(UserResource, '/', '/<id>')
+api.add_resource(UserResource, '', '/<id>')
+api.add_resource(InvitationResource, '/event/<id>')
 
 #     @jwt_required
 #     def get(self, id):
