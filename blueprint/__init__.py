@@ -25,7 +25,7 @@ def internal_required(fn):
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
         claims = get_jwt_claims()
-        if claims['status'] == 'non internal':
+        if claims['status'] != 'internal':
             return {'status': 'FORBIDDEN', 'message': 'Internal Only'}, 403
         else:
             return fn(*args, **kwargs)
@@ -36,7 +36,7 @@ def internal_required(fn):
 ##########################
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:alta123@localhost:3306/project_rest'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:alta321@localhost:3306/project_rest'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

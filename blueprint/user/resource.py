@@ -110,13 +110,13 @@ class InvitationResource(Resource):
 
 
         return result, 200, {'Content-Type':'application/json'}
+      
 
 
-
-class ExternalUserList(Resource):
+class InternalUserResource(Resource):
     def __init__(self):
         pass
-    
+
     @jwt_required
     def get(self):
         parser=reqparse.RequestParser()
@@ -146,26 +146,6 @@ class ExternalUserList(Resource):
             rows.append(marshal(row,Event.response_fields))
 
         return rows, 200, {'Content-Type':'application/json'}
-
-
-class InternalUserResource(Resource):
-    def __init__(self):
-        pass
-
-    @jwt_required
-    def get(self):
-        claim = get_jwt_claims()
-        all_event = Event.query.all()
-
-        if all_event == None:
-            return {'message': 'no event'}, 404
-
-        event_list=[]
-        for event in all_event:
-            event_dict = marshal(event, Event.response_fields)
-            event_list.append(event_dict)
-
-        return event_list, 200
 
     @jwt_required
     @internal_required
@@ -229,8 +209,7 @@ class InternalUserResource(Resource):
         return {'message': 'event succesfully deleted'}, 200
 
    
-        
-api.add_resource(ExternalUserList,'/event')
+
 api.add_resource(InvitationResource,'/get_event/<id>')
 api.add_resource(InternalUserResource, '/event', '/event/<id>')
 
