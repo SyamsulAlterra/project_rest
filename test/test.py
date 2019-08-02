@@ -1,8 +1,47 @@
 import json
-from . import app,client, cache, create_token_internal,create_token_non_internal
-
+from . import app,client, cache, create_token_internal, create_token_non_internal
 
 class TestEvent():
+    #internal user get all event
+    def test_valid_get_internal_user(self, client):
+        token = create_token_internal()
+        res = client.get('/user/event', headers={'Authorization': 'Bearer '+token})
+        assert res.status_code == 200
+        
+    #internal user post an event
+    def test_valid_post_event(self, client):
+        token = create_token_internal()
+        data = {
+            'nama': 'Hore hore',
+            'ip': '138.68.161.14',
+            'waktu': '2010-10-10 14:00:00'
+        }
+        res = client.post('/user/event', headers={'Authorization': 'Bearer '+token}, data=json.dumps(data), content_type='application/json')
+        assert res.status_code == 200
+
+    #invalid post from non internal user
+    def test_invalid_post_event(self,client):
+        token = create_token_non_internal()
+        data = {
+            'nama': 'Hore hore',
+            'ip': '138.68.161.14',
+            'waktu': '2010-10-10 14:00:00'
+        }
+        res = client.post('/user/event', headers={'Authorization': 'Bearer '+token}, data=json.dumps(data), content_type='application/json')
+        assert res.status_code == 403
+
+    #valid delete post from internal user
+    def test_valid_delete_event(self, client):
+        token = create_token_internal()
+        res = client.delete('/user/event/8', headers={'Authorization': 'Bearer '+token})
+        assert res.status_code == 200
+
+    def test_invalid_delete_event(self, client):
+        token = create_token_non_internal()
+        res = client.delete('/user/event/8', headers={'Authorization': 'Bearer '+token})
+        assert res.status_code == 403
+
+
     def test_event_get(self,client):
         token = create_token_internal()
         res = client.get('/user/get_event/1',headers={'Authorization':'Bearer '+token})
@@ -20,75 +59,3 @@ class TestEvent():
         res_json = json.loads(res.data)
         assert res.status_code == 500
 
-
-
-
-
-
-# class TestClientCrud():
-#     tempclient=0
-#     def test_client_get(self,client):
-#         token = create_token_internal()
-#         res = client.get('/client/list',headers={'Authorization':'Bearer '+token})
-#         res_json = json.loads(res.data)
-#         assert res.status_code == 200
-
-#     def test_client_get_invalid_token(self,client):
-#         res = client.get('/client/list',headers={'Authorization':'Bearer abc'})
-#         res_json = json.loads(res.data)
-#         assert res.status_code == 500
-
-#     def test_client_post(self,client):
-#         token = create_token_internal()
-#         data = {
-#             "client_key": "SECRET00",
-#             "client_secret": "internalreal",
-#             "status": False
-#         }
-#         res = client.post('/client',headers={'Authorization':'Bearer '+token}, data=json.dumps(data),content_type='application/json')
-#         res_json = json.loads(res.data)
-#         TestClientCrud.tempclient=res_json['client_id']
-#         assert res.status_code == 200
-
-#     def test_client_post_invalid_status(self,client):
-#         token = create_token_internal()
-#         data = {
-#             "client_key": "SECRET00",
-#             "client_secret": "internalreal"
-#         }
-#         res = client.post('/client',headers={'Authorization':'Bearer '+token},data=json.dumps(data), content_type='application/json')
-#         res_json = json.loads(res.data)
-#         assert res.status_code == 400
-
-#     def test_client_put(self,client):
-#         token = create_token_internal()
-#         data = {
-#             "client_key": "SECRET00",
-#             "client_secret": "internalreall",
-#             "status": False
-#         }
-#         res = client.put('/client/'+str(TestClientCrud.tempclient),headers={'Authorization':'Bearer '+token}, data=json.dumps(data),content_type='application/json')
-#         res_json = json.loads(res.data)
-#         assert res.status_code == 200
-
-#     def test_client_put_invalid_status(self,client):
-#         token = create_token_internal()
-#         data = {
-#             "client_key": "SECRET00",
-#             "client_secret": "internalreall"
-#         }
-#         res = client.put('/client/'+str(TestClientCrud.tempclient),headers={'Authorization':'Bearer '+token}, data=json.dumps(data),content_type='application/json')
-#         res_json = json.loads(res.data)
-#         assert res.status_code == 400
-
-#     def test_client_delete(self,client):
-#         token = create_token_internal()
-#         res = client.delete('/client/'+str(TestClientCrud.tempclient),headers={'Authorization':'Bearer '+token}, content_type='application/json')
-#         res_json = json.loads(res.data)
-#         assert res.status_code == 200
-
-#     def test_client_delete_invalid_id(self,client):
-#         token = create_token_internal()
-#         res = client.delete('/client/0',headers={'Authorization':'Bearer '+token}, content_type='application/json')
-#         res_json = json.loads(res.data)
-#         assert res.status_code == 404

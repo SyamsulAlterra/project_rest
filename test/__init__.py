@@ -38,7 +38,7 @@ def create_token_non_internal():
     token = cache.get('test-token-non-internal')
     if token is None:
         data={
-            'id' : '0',
+            'id' : '4',
         }
 
         req = call_client(request)
