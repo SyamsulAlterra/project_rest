@@ -59,3 +59,4 @@ class TestEvent():
         res_json = json.loads(res.data)
         assert res.status_code == 500
 
+# dari nada
