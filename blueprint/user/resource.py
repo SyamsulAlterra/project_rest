@@ -94,7 +94,8 @@ class InvitationResource(Resource):
         qry=EventGuest.query.filter_by(event_id=id)
         guest_list=[]
         for gues in qry.all():
-            guest_id = marshal(gues ,EventGuest.response_fields)['user_id']
+            # guest_name = marshal(gues,EventGuest.response_fields)
+            guest_id = marshal(gues,EventGuest.response_fields)['user_id']
             guest_name=marshal(User.query.get(guest_id), User.response_fields)['nama']
             guest_list.append(guest_name)
       
