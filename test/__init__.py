@@ -1,7 +1,7 @@
 import pytest,json, logging
 from flask import Flask, request
 
-from blueprints import app
+from blueprint import app
 from app import cache
 
 def call_client(request):
@@ -20,7 +20,7 @@ def create_token_internal():
         }
 
         req = call_client(request)
-        res = req.get('/token',query_string=data)
+        res = req.post('/login/login',query_string=data)
 
         res_json=json.loads(res.data)
 
@@ -42,7 +42,7 @@ def create_token_non_internal():
         }
 
         req = call_client(request)
-        res = req.get('/token',query_string=data)
+        res = req.post('/login/login',query_string=data)
 
         res_json=json.loads(res.data)
 
