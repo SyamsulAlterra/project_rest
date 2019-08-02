@@ -75,15 +75,8 @@ class InvitationResource(Resource):
         exchange_rate=rates_des/rates_or
         # bahasa
         bahasa=event_location['languages']
-
-        result['event_name']=hasil['nama']
-        result['event_location'] = event_loc
-        result['event_date'] = hasil['waktu']
-        result['PIC'] = marshal(User.query.get(id), User.response_fields)['nama']
-        result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
-        result['islamic_praying_time']=jadwal_solat
-        result['language_to_learn']=bahasa
-
+        
+        #guest list
         claim=get_jwt_claims()
         new_eventguest = EventGuest(claim['id'],id)
 
@@ -92,6 +85,23 @@ class InvitationResource(Resource):
         db.session.add(new_eventguest)
         db.session.commit()
 
+        qry=EventGuest.query.filter_by(event_id=id)
+        guest_list=[]
+        for gues in qry.all():
+            guest_name = marshal(qry,EventGuest.response_fields)
+            # guest_id = marshal(qry,EventGuest.response_fields)['user_id']
+            # guest_name=marshal(User.query.get(guest_id), User.response_fields)['nama']
+            guest_list.append(guest_name)
+      
+
+        result['event_name']=hasil['nama']
+        result['event_location'] = event_loc
+        result['event_date'] = hasil['waktu']
+        result['PIC'] = marshal(User.query.get(id), User.response_fields)['nama']
+        result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
+        result['islamic_praying_time']=jadwal_solat
+        result['language_to_learn']=bahasa
+        result['event_guest']=guest_list
 
 
         return result, 200, {'Content-Type':'application/json'}
