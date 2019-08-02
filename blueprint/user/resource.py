@@ -145,12 +145,13 @@ class InternalUserResource(Resource):
     @jwt_required
     @internal_required
     def post(self):
-        claim = get_jwt_claims()
         parser = reqparse.RequestParser()
-        parser.add_argument('nama', location=json, required=True)
-        parser.add_argument('ip', location=json, required=True)
-        parser.add_argument('waktu', location=json, type=datetime, required=True)
+        parser.add_argument('nama', location='json', required=True)
+        parser.add_argument('ip', location='json', required=True)
+        parser.add_argument('waktu', location='json', required=True)
         args = parser.parse_args()
+
+        claim = get_jwt_claims()
         creator_id = claim['id']
         
         new_event = Event(args['nama'], args['ip'], args['waktu'], creator_id)
@@ -192,21 +193,21 @@ class InternalUserResource(Resource):
         return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
 
             
-        @jwt_required
-        @internal_required
-        def delete(self, id):
-            qry = Events.get(id)
-            if qry == None:
-                return {'message': 'event not found'}, 404
+    @jwt_required
+    @internal_required
+    def delete(self, id):
+        qry = Event.query.get(id)
+        if qry == None:
+            return {'message': 'event not found'}, 404
 
-            db.session.delete(qry)
-            db.session.commit()
+        db.session.delete(qry)
+        db.session.commit()
 
-            return {'message': 'event succesfully deleted'}, 200
+        return {'message': 'event succesfully deleted'}, 200
 
    
         
-api.add_resource(ExternalUserList,'/external')
-api.add_resource(InvitationResource,'/event/<id>')
-api.add_resource(InternalUserResource, '/internal', '/internal/<id>')
+api.add_resource(ExternalUserList,'/event')
+api.add_resource(InvitationResource,'/get_event/<id>')
+api.add_resource(InternalUserResource, '/event', '/event/<id>')
 

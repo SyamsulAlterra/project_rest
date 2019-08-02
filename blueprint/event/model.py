@@ -6,7 +6,7 @@ class Event(db.Model):
     id=db.Column(db.Integer, primary_key=True, autoincrement=True)
     nama=db.Column(db.String(30), nullable=False)
     ip=db.Column(db.String(20), nullable=False)
-    waktu=db.Column(db.DateTime, nullable=False)
+    waktu=db.Column(db.String(30), nullable=False)
     user_id=db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     response_fields={
