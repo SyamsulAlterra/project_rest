@@ -18,6 +18,9 @@ class InvitationResource(Resource):
     @jwt_required
     def get(self, id):
         claim=get_jwt_claims()
+        qry=Event.query.get(id)
+        if qry is None:
+            return {'status':'EVENT_NOT_FOUND'},404
 
         location_host = 'https://api.ipgeolocation.io/ipgeo'
         location_apikey = 'fb1a8036e91f496092fb3a34f3abbb0f'
@@ -44,9 +47,6 @@ class InvitationResource(Resource):
         rates_or = currency_data['rates'][currency_code_or]
 
    
-        qry=Event.query.get(id)
-        if qry is None:
-            return {'status':'EVENT_NOT_FOUND'},404
         hasil = marshal(qry,Event.response_fields)
 
         result={}
@@ -76,13 +76,13 @@ class InvitationResource(Resource):
         # bahasa
         bahasa=event_location['languages']
 
-        result['event_name']=hasil['nama']
-        result['event_location'] = event_loc
-        result['event_date'] = hasil['waktu']
-        result['PIC'] = marshal(User.query.get(hasil['user_id']), User.response_fields)['nama']
-        result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
-        result['islamic_praying_time']=jadwal_solat
-        result['language_to_learn']=bahasa
+        # result['event_name']=hasil['nama']
+        # result['event_location'] = event_loc
+        # result['event_date'] = hasil['waktu']
+        # result['PIC'] = marshal(User.query.get(hasil['user_id']), User.response_fields)['nama']
+        # result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
+        # result['islamic_praying_time']=jadwal_solat
+        # result['language_to_learn']=bahasa
 
         evenguest_qry = EventGuest.query.filter_by(user_id=claim['id']).filter_by(event_id=id).first()
         if evenguest_qry is None:
@@ -102,7 +102,7 @@ class InvitationResource(Resource):
         result['event_name']=hasil['nama']
         result['event_location'] = event_loc
         result['event_date'] = hasil['waktu']
-        result['PIC'] = marshal(User.query.get(id), User.response_fields)['nama']
+        result['PIC'] = marshal(User.query.get(hasil['user_id']), User.response_fields)['nama']
         result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
         result['islamic_praying_time']=jadwal_solat
         result['language_to_learn']=bahasa
@@ -184,9 +184,9 @@ class InternalUserResource(Resource):
         if qry is None:
             return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
 
-        qry = marshal(qry, Event.response_fields)
+        qry2 = marshal(qry, Event.response_fields)
 
-        if qry['user_id'] == get_jwt_claims()['id']:
+        if qry2['user_id'] == get_jwt_claims()['id']:
             external_user_id=get_jwt_claims()['id']
 
             qry.nama = args['nama']
@@ -207,11 +207,19 @@ class InternalUserResource(Resource):
         if qry == None:
             return {'message': 'event not found'}, 404
 
-        db.session.delete(qry)
-        db.session.commit()
+        qry2 = marshal(qry, Event.response_fields)
+        if qry2['user_id'] == get_jwt_claims()['id']:
+            eventguest_qry = EventGuest.query.filter_by(event_id=id).all()
+            for eventguest in eventguest_qry:
+                db.session.delete(eventguest)
+                db.session.commit()
+                
+            db.session.delete(qry)
+            db.session.commit()
 
-        return {'message': 'event succesfully deleted'}, 200
+            return {'message': 'event succesfully deleted'}, 200
 
+        return {'message': 'you can only delete your own event'}, 403
    
 
 api.add_resource(InvitationResource,'/get_event/<id>')
