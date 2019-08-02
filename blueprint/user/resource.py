@@ -76,13 +76,13 @@ class InvitationResource(Resource):
         # bahasa
         bahasa=event_location['languages']
 
-        result['event_name']=hasil['nama']
-        result['event_location'] = event_loc
-        result['event_date'] = hasil['waktu']
-        result['PIC'] = marshal(User.query.get(hasil['user_id']), User.response_fields)['nama']
-        result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
-        result['islamic_praying_time']=jadwal_solat
-        result['language_to_learn']=bahasa
+        # result['event_name']=hasil['nama']
+        # result['event_location'] = event_loc
+        # result['event_date'] = hasil['waktu']
+        # result['PIC'] = marshal(User.query.get(hasil['user_id']), User.response_fields)['nama']
+        # result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
+        # result['islamic_praying_time']=jadwal_solat
+        # result['language_to_learn']=bahasa
 
         evenguest_qry = EventGuest.query.filter_by(user_id=claim['id']).filter_by(event_id=id).first()
         if evenguest_qry is None:
@@ -102,7 +102,7 @@ class InvitationResource(Resource):
         result['event_name']=hasil['nama']
         result['event_location'] = event_loc
         result['event_date'] = hasil['waktu']
-        result['PIC'] = marshal(User.query.get(id), User.response_fields)['nama']
+        result['PIC'] = marshal(User.query.get(hasil['user_id']), User.response_fields)['nama']
         result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
         result['islamic_praying_time']=jadwal_solat
         result['language_to_learn']=bahasa
@@ -184,9 +184,9 @@ class InternalUserResource(Resource):
         if qry is None:
             return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
 
-        qry = marshal(qry, Event.response_fields)
+        qry2 = marshal(qry, Event.response_fields)
 
-        if qry['user_id'] == get_jwt_claims()['id']:
+        if qry2['user_id'] == get_jwt_claims()['id']:
             external_user_id=get_jwt_claims()['id']
 
             qry.nama = args['nama']
