@@ -78,7 +78,7 @@ class InvitationResource(Resource):
         result['event_name']=hasil['nama']
         result['event_location'] = event_loc
         result['event_date'] = hasil['waktu']
-        result['PIC'] = marshal(User.query.get(id), User.response_fields)['nama']
+        result['PIC'] = hasil['user_id']
         result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
         result['islamic_praying_time']=jadwal_solat
         result['language_to_learn']=bahasa
