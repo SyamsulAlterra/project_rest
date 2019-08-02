@@ -25,7 +25,7 @@ def internal_required(fn):
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
         claims = get_jwt_claims()
-        if claims['internal_status'] == 'internal':
+        if claims['status'] != 'internal':
             return {'status': 'FORBIDDEN', 'message': 'Internal Only'}, 403
         else:
             return fn(*args, **kwargs)
@@ -34,7 +34,10 @@ def internal_required(fn):
 ##########################
 # DATABASE
 ##########################
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:alta123@localhost:3306/live_code_rest'
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:alta321@localhost:3306/project_rest'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -70,8 +73,16 @@ def after_request(response):
 # RESOURCES
 ###############
 
-from .auth import bp_auth
 
-app.register_blueprint(bp_auth, urlprefix='/login')
+from blueprint.auth import bp_auth
+from blueprint.user.resource import bp_user
+from blueprint.event.resource import bp_event
+from blueprint.eventguest.resource import bp_eventguest
+
+
+app.register_blueprint(bp_auth, url_prefix='/login')
+app.register_blueprint(bp_user, url_prefix='/user')
+app.register_blueprint(bp_event, url_prefix='/')
+
 
 db.create_all()
