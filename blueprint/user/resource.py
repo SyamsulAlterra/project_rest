@@ -18,9 +18,6 @@ class InvitationResource(Resource):
     @jwt_required
     def get(self, id):
         claim=get_jwt_claims()
-        evenguest_qry = EventGuest.query.filter_by(user_id=claim['id']).filter_by(event_id=id)
-        if evenguest_qry is not None:
-            return {'message': 'you already booked that event'}, 200
 
         location_host = 'https://api.ipgeolocation.io/ipgeo'
         location_apikey = 'fb1a8036e91f496092fb3a34f3abbb0f'
@@ -87,22 +84,20 @@ class InvitationResource(Resource):
         result['islamic_praying_time']=jadwal_solat
         result['language_to_learn']=bahasa
 
-        new_eventguest = EventGuest(claim['id'],id)
+        evenguest_qry = EventGuest.query.filter_by(user_id=claim['id']).filter_by(event_id=id).first()
+        if evenguest_qry is None:
+            new_eventguest = EventGuest(claim['id'],id)
 
-        # app.logger.debug('DEBUG : %s', new_eventguest)
-
-        db.session.add(new_eventguest)
-        db.session.commit()
+            db.session.add(new_eventguest)
+            db.session.commit()
 
         qry=EventGuest.query.filter_by(event_id=id)
         guest_list=[]
         for gues in qry.all():
-            guest_name = marshal(qry,EventGuest.response_fields)
-            # guest_id = marshal(qry,EventGuest.response_fields)['user_id']
-            # guest_name=marshal(User.query.get(guest_id), User.response_fields)['nama']
+            guest_id = marshal(gues ,EventGuest.response_fields)['user_id']
+            guest_name=marshal(User.query.get(guest_id), User.response_fields)['nama']
             guest_list.append(guest_name)
       
-
         result['event_name']=hasil['nama']
         result['event_location'] = event_loc
         result['event_date'] = hasil['waktu']
