@@ -60,5 +60,9 @@ class TestEventEndpoint():
         }
         res = client.post('/user/event', headers={'Authorization': 'Bearer '+token}, data=json.dumps(data), content_type='application/json')
 
+<<<<<<< HEAD
         assert res.status_code == 403
     
+=======
+# dari nada
+>>>>>>> ca64a26dbc544f4f55a19741d291c95387094d29
