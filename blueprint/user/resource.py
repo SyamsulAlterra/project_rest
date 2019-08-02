@@ -18,9 +18,6 @@ class InvitationResource(Resource):
     @jwt_required
     def get(self, id):
         claim=get_jwt_claims()
-        evenguest_qry = EventGuest.query.filter_by(user_id=claim['id']).filter_by(event_id=id)
-        if evenguest_qry is not None:
-            return {'message': 'you already booked that event'}, 200
 
         location_host = 'https://api.ipgeolocation.io/ipgeo'
         location_apikey = 'fb1a8036e91f496092fb3a34f3abbb0f'
@@ -87,22 +84,20 @@ class InvitationResource(Resource):
         result['islamic_praying_time']=jadwal_solat
         result['language_to_learn']=bahasa
 
-        new_eventguest = EventGuest(claim['id'],id)
+        evenguest_qry = EventGuest.query.filter_by(user_id=claim['id']).filter_by(event_id=id).first()
+        if evenguest_qry is None:
+            new_eventguest = EventGuest(claim['id'],id)
 
-        # app.logger.debug('DEBUG : %s', new_eventguest)
-
-        db.session.add(new_eventguest)
-        db.session.commit()
+            db.session.add(new_eventguest)
+            db.session.commit()
 
         qry=EventGuest.query.filter_by(event_id=id)
         guest_list=[]
         for gues in qry.all():
-            guest_name = marshal(qry,EventGuest.response_fields)
-            # guest_id = marshal(qry,EventGuest.response_fields)['user_id']
-            # guest_name=marshal(User.query.get(guest_id), User.response_fields)['nama']
+            guest_id = marshal(gues ,EventGuest.response_fields)['user_id']
+            guest_name=marshal(User.query.get(guest_id), User.response_fields)['nama']
             guest_list.append(guest_name)
       
-
         result['event_name']=hasil['nama']
         result['event_location'] = event_loc
         result['event_date'] = hasil['waktu']
@@ -198,8 +193,9 @@ class InternalUserResource(Resource):
     def put(self, id):
         parser=reqparse.RequestParser()
 
-        parser.add_argument('nama',location='json',required=True)
-        parser.add_argument('waktu',location='json',required=True)
+        parser.add_argument('nama', location='json', required=True)
+        parser.add_argument('ip', location='json', required=True)
+        parser.add_argument('waktu', location='json', required=True)
 
         args = parser.parse_args()
 
@@ -208,14 +204,10 @@ class InternalUserResource(Resource):
         if qry is None:
             return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
 
-        rq=requests.get('https://ip.seeip.org/json')
-        external_user_ip=rq.json()
-
-        data = parser.parse_args()
         external_user_id=get_jwt_claims()['id']
 
         qry.nama = args['nama']
-        qry.ip = external_user_ip
+        qry.ip = args['ip']
         qry.waktu = args['waktu']
         qry.user_id = external_user_id
         db.session.commit()
