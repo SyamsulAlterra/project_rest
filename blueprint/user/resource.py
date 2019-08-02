@@ -11,14 +11,17 @@ bp_user = Blueprint('user',__name__)
 api = Api(bp_user)
 
 
-
-   
 class InvitationResource(Resource):
     def __init__(self):
         pass
 
     @jwt_required
     def get(self, id):
+        claim=get_jwt_claims()
+        evenguest_qry = EventGuest.query.filter_by(user_id=claim['id']).filter_by(event_id=id)
+        if evenguest_qry is not None:
+            return {'message': 'you already booked that event'}, 200
+
         location_host = 'https://api.ipgeolocation.io/ipgeo'
         location_apikey = 'fb1a8036e91f496092fb3a34f3abbb0f'
         currency_host = 'http://data.fixer.io/api/latest'
@@ -72,12 +75,18 @@ class InvitationResource(Resource):
         # negara
         currency_code_des=event_location['currency']['code']
         rates_des = currency_data['rates'][currency_code_des]
-        exchange_rate=rates_des/rates_or
+        exchange_rate=rates_or/rates_des
         # bahasa
         bahasa=event_location['languages']
-        
-        #guest list
-        claim=get_jwt_claims()
+
+        result['event_name']=hasil['nama']
+        result['event_location'] = event_loc
+        result['event_date'] = hasil['waktu']
+        result['PIC'] = marshal(User.query.get(hasil['user_id']), User.response_fields)['nama']
+        result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
+        result['islamic_praying_time']=jadwal_solat
+        result['language_to_learn']=bahasa
+
         new_eventguest = EventGuest(claim['id'],id)
 
         # app.logger.debug('DEBUG : %s', new_eventguest)
@@ -165,12 +174,14 @@ class InternalUserResource(Resource):
     @jwt_required
     @internal_required
     def post(self):
-        claim = get_jwt_claims()
         parser = reqparse.RequestParser()
-        parser.add_argument('nama', location=json, required=True)
-        parser.add_argument('ip', location=json, required=True)
-        parser.add_argument('waktu', location=json, required=True)
+
+        parser.add_argument('nama', location='json', required=True)
+        parser.add_argument('ip', location='json', required=True)
+        parser.add_argument('waktu', location='json', required=True)
         args = parser.parse_args()
+
+        claim = get_jwt_claims()
         creator_id = claim['id']
         
         new_event = Event(args['nama'], args['ip'], args['waktu'], creator_id)
@@ -211,11 +222,11 @@ class InternalUserResource(Resource):
 
         return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
 
-      
+            
     @jwt_required
     @internal_required
     def delete(self, id):
-        qry = Event.get(id)
+        qry = Event.query.get(id)
         if qry == None:
             return {'message': 'event not found'}, 404
 
@@ -226,7 +237,7 @@ class InternalUserResource(Resource):
 
    
         
-api.add_resource(ExternalUserList,'/external')
-api.add_resource(InvitationResource,'/event/<id>')
-api.add_resource(InternalUserResource, '/internal', '/internal/<id>')
+api.add_resource(ExternalUserList,'/event')
+api.add_resource(InvitationResource,'/get_event/<id>')
+api.add_resource(InternalUserResource, '/event', '/event/<id>')
 
