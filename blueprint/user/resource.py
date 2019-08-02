@@ -193,8 +193,9 @@ class InternalUserResource(Resource):
     def put(self, id):
         parser=reqparse.RequestParser()
 
-        parser.add_argument('nama',location='json',required=True)
-        parser.add_argument('waktu',location='json',required=True)
+        parser.add_argument('nama', location='json', required=True)
+        parser.add_argument('ip', location='json', required=True)
+        parser.add_argument('waktu', location='json', required=True)
 
         args = parser.parse_args()
 
@@ -203,14 +204,10 @@ class InternalUserResource(Resource):
         if qry is None:
             return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
 
-        rq=requests.get('https://ip.seeip.org/json')
-        external_user_ip=rq.json()
-
-        data = parser.parse_args()
         external_user_id=get_jwt_claims()['id']
 
         qry.nama = args['nama']
-        qry.ip = external_user_ip
+        qry.ip = args['ip']
         qry.waktu = args['waktu']
         qry.user_id = external_user_id
         db.session.commit()
