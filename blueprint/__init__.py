@@ -25,7 +25,7 @@ def internal_required(fn):
     def wrapper(*args, **kwargs):
         verify_jwt_in_request()
         claims = get_jwt_claims()
-        if claims['status'] != 'internal':
+        if claims['status'] == 'non internal':
             return {'status': 'FORBIDDEN', 'message': 'Internal Only'}, 403
         else:
             return fn(*args, **kwargs)
@@ -77,6 +77,8 @@ def after_request(response):
 from blueprint.auth import bp_auth
 from blueprint.user.resource import bp_user
 from blueprint.event.resource import bp_event
+from blueprint.eventguest.resource import bp_eventguest
+
 
 app.register_blueprint(bp_auth, url_prefix='/login')
 app.register_blueprint(bp_user, url_prefix='/user')

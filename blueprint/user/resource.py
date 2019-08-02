@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask_restful import Api, reqparse, Resource, marshal
 from .model import User
 from blueprint.event.model import Event
+from blueprint.eventguest.model import EventGuest
 from blueprint import db, app,internal_required
 from flask_jwt_extended import jwt_required, get_jwt_claims
 import requests, json, datetime
@@ -39,8 +40,6 @@ class InvitationResource(Resource):
         my_location = data['district']+', '+data['city']+', '+data['state_prov']+', '+data['country_name']
         currency_code_or = data['currency']['code']
         rates_or = currency_data['rates'][currency_code_or]
-
-
 
    
         qry=Event.query.get(id)
@@ -82,6 +81,15 @@ class InvitationResource(Resource):
         result['exchange_rate']='1 ' + currency_code_or +': '+str(exchange_rate)+' '+currency_code_des
         result['islamic_praying_time']=jadwal_solat
         result['language_to_learn']=bahasa
+
+        claim=get_jwt_claims()
+        new_eventguest = EventGuest(claim['id'],id)
+
+        # app.logger.debug('DEBUG : %s', new_eventguest)
+
+        db.session.add(new_eventguest)
+        db.session.commit()
+
 
 
         return result, 200, {'Content-Type':'application/json'}
@@ -146,6 +154,7 @@ class InternalUserResource(Resource):
     @internal_required
     def post(self):
         parser = reqparse.RequestParser()
+
         parser.add_argument('nama', location='json', required=True)
         parser.add_argument('ip', location='json', required=True)
         parser.add_argument('waktu', location='json', required=True)
