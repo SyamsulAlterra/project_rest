@@ -201,19 +201,23 @@ class InternalUserResource(Resource):
         args = parser.parse_args()
 
         qry = Event.query.get(id)
-
         if qry is None:
             return {'status' : 'NOT_FOUND', 'message':'User not found'}, 404
 
-        external_user_id=get_jwt_claims()['id']
+        qry = marshal(qry, Event.response_fields)
 
-        qry.nama = args['nama']
-        qry.ip = args['ip']
-        qry.waktu = args['waktu']
-        qry.user_id = external_user_id
-        db.session.commit()
+        if qry['user_id'] == get_jwt_claims()['id']:
+            external_user_id=get_jwt_claims()['id']
 
-        return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
+            qry.nama = args['nama']
+            qry.ip = args['ip']
+            qry.waktu = args['waktu']
+            qry.user_id = external_user_id
+            db.session.commit()
+
+            return marshal(qry,Event.response_fields), 200, {'Content-Type':'application/json'}
+
+        return {'message': 'you can only edit your own event'}, 403
 
             
     @jwt_required
